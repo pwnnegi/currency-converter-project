@@ -15,7 +15,7 @@ useEffect(() => {
         const apiUrl = 'https://api.frankfurter.app/currencies'
         fetch(apiUrl).then((res)=>{
              res.json().then((data)=> {
-              console.log(data);
+        console.log(data);
               
             setCountryCode(data)
             })
