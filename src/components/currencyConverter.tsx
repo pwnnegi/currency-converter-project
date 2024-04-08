@@ -1,62 +1,134 @@
-import React, { useEffect, useState } from 'react'
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select  from '@mui/material/Select';
-import { InputLabel } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import {
+  Button,
+  Container,
+  Grid,
+  InputLabel,
+  TextField,
+  Theme,
+  Typography,
+} from "@mui/material";
 
 const CurrencyConverter = () => {
-    const[countryCode, setCountryCode]=useState<[]>([])
-    const[selectedCurrency, setSelectedCurrency]= useState<string>('')
-useEffect(() => {
-    getCountryViseCurrency()
-}, []);
+  const [countryCode, setCountryCode] = useState<[]>([]);
+  const [fromCurrency, setFromCurrency] = useState<string>("");
+  const [toCurrency, setToCurrency] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [convertedAmount, setConvertedAmount] = useState<any>(null);
 
-    const getCountryViseCurrency = ()=>{
-        const apiUrl = 'https://api.frankfurter.app/currencies'
-        fetch(apiUrl).then((res)=>{
-             res.json().then((data)=> {
-        console.log(data);
-              
-            setCountryCode(data)
-            })
-            
-        })   
+  useEffect(() => {
+    getCountryViseCurrency();
+  }, []);
+
+  const getCountryViseCurrency = () => {
+    const apiUrl = "https://api.frankfurter.app/currencies";
+    fetch(apiUrl).then((res) => {
+      res.json().then((data) => {
+        setCountryCode(data);
+      });
+    });
+  };
+
+  const handleConvert = async () => {
+    try {
+      const host = "api.frankfurter.app";
+      await fetch(
+        `https://${host}/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`
+      )
+        .then((resp) => resp.json())
+        .then((data) => {
+          console.log(data);
+          setConvertedAmount(data.rates[toCurrency]);
+        });
+    } catch (err) {
+      console.log(err);
     }
+  };
 
-    const handleChange= (e: any)=>{
-console.log(e.target.value);
-
-    }
-
-    // const renderMenu = ()=>{
-    //   Object.keys(countryCode as any).forEach((key)=> {
-    //    return console.log(countryCode[key as any]) // baz
-    //   })
-    //   }
   return (
-
-    <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-    <InputLabel id="demo-select-small-label">Age</InputLabel>
-    <Select
-      labelId="demo-select-small-label"
-      id="demo-select-small"
-      value={selectedCurrency}
-      label="Age"
-      onChange={handleChange}
+    <Container
+      sx={{
+        marginTop: 4,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+      maxWidth="sm"
     >
-
-  
-
-{
-  Object.keys(countryCode as any).map((i)=>(
-
-    <MenuItem value={i} >{i}</MenuItem>
-  ))
-
-}
-  
-    </Select>
-  </FormControl>
-  
-  )}
-export default CurrencyConverter
+      <Typography variant="h4" gutterBottom>
+        Currency Converter
+      </Typography>
+      <div
+        style={{
+          display: "flex",
+          marginBottom: 2,
+        }}
+      >
+        <FormControl
+          sx={{
+            minWidth: 120,
+            marginRight: 2,
+          }}
+        >
+          <Select
+            value={fromCurrency}
+            onChange={(e) => setFromCurrency(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              Convert From
+            </MenuItem>
+            {Object.keys(countryCode as any).map((code, index) => (
+              <MenuItem value={code} key={index}>
+                {code}
+              </MenuItem>
+            ))}
+            {/* Add more currencies as needed */}
+          </Select>
+        </FormControl>
+        <FormControl
+          sx={{
+            minWidth: 120,
+            marginRight: 2,
+          }}
+        >
+          <Select
+            value={toCurrency}
+            onChange={(e) => setToCurrency(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="" disabled>
+              Convert To
+            </MenuItem>
+            {Object.keys(countryCode as any).map((code, index) => (
+              <MenuItem value={code} key={index}>
+                {code}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+      <TextField
+        label="Amount"
+        variant="outlined"
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        fullWidth
+        // marginBottom={2}
+      />
+      <Button variant="contained" color="primary" onClick={handleConvert}>
+        Convert
+      </Button>
+      {convertedAmount && (
+        <Typography variant="h6" gutterBottom>
+          Converted Amount: {convertedAmount} {toCurrency}
+        </Typography>
+      )}
+    </Container>
+  );
+};
+export default CurrencyConverter;
